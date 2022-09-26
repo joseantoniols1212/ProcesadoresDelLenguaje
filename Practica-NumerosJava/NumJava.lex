@@ -23,14 +23,17 @@
 0[0-7]+            { return new Yytoken(Yytoken.TOKEN_CTE_ENTERO, yytext());}
 
 // -Decimal
-[0-9]+                   { return new Yytoken(Yytoken.TOKEN_CTE_ENTERO, yytext());}
+0|[1-9][0-9]*      { return new Yytoken(Yytoken.TOKEN_CTE_ENTERO, yytext());}
 
 // Real corto
 [0-9]+\.[0-9]+(E(\+|-)?[0-9]+)?(f|F)       { return new Yytoken(Yytoken.TOKEN_CTE_REAL_CORTO, yytext());}
 \.[0-9]+(E(\+|-)?[0-9]+)?(f|F)             { return new Yytoken(Yytoken.TOKEN_CTE_REAL_CORTO, yytext());}
 [0-9]+\.(E(\+|-)?[0-9]+)?(f|F)            { return new Yytoken(Yytoken.TOKEN_CTE_REAL_CORTO, yytext());}
+[0-9]+(E(\+|-)?[0-9]+)?(f|F)            { return new Yytoken(Yytoken.TOKEN_CTE_REAL_CORTO, yytext());}
 
 // Real largo
+[0-9]+(E(\+|-)?[0-9]+)?(d|D)            { return new Yytoken(Yytoken.TOKEN_CTE_REAL_LARGO, yytext());}
+[0-9]+(E(\+|-)?[0-9]+)            { return new Yytoken(Yytoken.TOKEN_CTE_REAL_LARGO, yytext());}
 [0-9]+\.[0-9]+(E(\+|-)?[0-9]+)?(d|D)       { return new Yytoken(Yytoken.TOKEN_CTE_REAL_LARGO, yytext());}
 [0-9]+\.(E(\+|-)?[0-9]+)?(d|D)       { return new Yytoken(Yytoken.TOKEN_CTE_REAL_LARGO, yytext());}
 \.[0-9]+(E(\+|-)?[0-9]+)?(d|D)      { return new Yytoken(Yytoken.TOKEN_CTE_REAL_LARGO, yytext());}
@@ -43,4 +46,4 @@
 
 // Error
 
-.+                           { return new Yytoken(Yytoken.TOKEN_ERROR, yytext());}
+[^\s]+                           { return new Yytoken(Yytoken.TOKEN_ERROR, yytext());}
