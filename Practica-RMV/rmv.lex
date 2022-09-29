@@ -23,7 +23,7 @@ Comando       = [a-zA-Z][a-zA-Z0-9_]*
   /* variable */
   {Variable}/\=          { variable = yytext(); valor=""; yybegin(EQUAL); }
 
-  [\s\n]              { }
+  [\s\n]                 { }
 
 }
 
@@ -39,6 +39,8 @@ Comando       = [a-zA-Z][a-zA-Z0-9_]*
 
   /* valor */
   [^\n\s\;]              { valor += yytext(); } 
+
+  \\;                    { valor += ";" ; } 
 
   /* final de linea o punto y coma*/
   [\n\;]                 { TablaSimbolos.put(variable, valor); yybegin(YYINITIAL); }
@@ -59,6 +61,10 @@ Comando       = [a-zA-Z][a-zA-Z0-9_]*
 }
 
 <TEXTO> {
+
+  \\\"                  { valor+= "\""; }
+
+  \\\$                  { valor+= "$"; }
 
   /* variable */
   \${Variable}          { valor += TablaSimbolos.get(yytext()); }
