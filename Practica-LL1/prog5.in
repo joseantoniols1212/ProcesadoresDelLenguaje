@@ -1,0 +1,4 @@
+while(x<y) {
+   x=y;
+   while(x<y) do x=y; while (y<z);
+}

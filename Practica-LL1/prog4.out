@@ -1,0 +1,30 @@
+axioma -> listaSent EOF
+listaSent -> sent listaSent
+sent -> WHILE AP cond CP sent
+cond -> var MENOR var
+var -> IDENT
+var -> NUMERO
+sent -> ALL listaSent CLL
+listaSent -> sent listaSent
+sent -> IDENT IGUAL var PYC
+var -> NUMERO
+listaSent -> sent listaSent
+sent -> WHILE AP cond CP sent
+cond -> var MENOR var
+var -> IDENT
+var -> NUMERO
+sent -> IDENT IGUAL var PYC
+var -> NUMERO
+listaSent -> sent listaSent
+sent -> WHILE AP cond CP sent
+cond -> var MENOR var
+var -> IDENT
+var -> IDENT
+sent -> WHILE AP cond CP sent
+cond -> var MENOR var
+var -> IDENT
+var -> IDENT
+sent -> IDENT IGUAL var PYC
+var -> NUMERO
+listaSent ->
+listaSent ->
