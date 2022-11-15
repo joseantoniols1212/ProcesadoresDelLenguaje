@@ -1,2 +1,5 @@
 *.class
 *.zip
+parser.java
+sym.java
+Yylex.*
