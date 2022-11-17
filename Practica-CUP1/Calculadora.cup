@@ -6,9 +6,8 @@ terminal Integer  NUM;
 non terminal          lineas, linea;
 non terminal Integer  exp;
 
-precedence left PLUS;
+precedence left PLUS, MINUS;
 precedence left MUL, DIV;
-precedence left MINUS;
 
 lineas ::= lineas linea
          | linea 

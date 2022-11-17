@@ -2,13 +2,8 @@
 
 clear
 
-echo "===== CUP ====="
-cup Calculadora.cup
+jflex Calculadora.flex
 
-echo "==== JFLEX ===="
-jflex Calculadora.lex
-
-echo "==== JAVAs ===="
-javac *.java
-
-echo "==============="
+java -jar java-cup-11b.jar Calculadora.cup
+javac -cp java-cup-11b.jar: *.java
+java -cp java-cup-11b.jar: Calculadora prueba.txt
