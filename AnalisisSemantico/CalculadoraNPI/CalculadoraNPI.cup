@@ -1,0 +1,29 @@
+import java_cup.runtime.*;
+
+terminal              PLUS, MINUS, MUL, DIV, LP, RP, NL, UMINUS;
+terminal String       NUM;
+
+non terminal          lineas, linea;
+non terminal String   exp;
+
+precedence left       MINUS, PLUS; 
+precedence left       MUL, DIV;
+precedence nonassoc   UMINUS;
+
+lineas ::= lineas linea
+         | linea
+         ;
+
+linea ::= exp:e NL          {: CalculadoraNPI.out.println(e); :}
+        | NL
+        ;
+
+exp ::= exp:a PLUS exp:b    {: RESULT = a+" "+b+" "+" +"; :}
+      | exp:a MINUS exp:b   {: RESULT = a+" "+b+" "+" -"; :}
+      | exp:a MUL exp:b     {: RESULT = a+" "+b+" "+" *"; :}
+      | exp:a DIV exp:b     {: RESULT = a+" "+b+" "+" /"; :}
+      | MINUS exp:e         {: RESULT = "0 "+e+" "+" -"; :}
+        %prec UMINUS
+      | LP exp:e RP         {: RESULT = e; :}
+      | NUM:n               {: RESULT = n; :}
+      ;
