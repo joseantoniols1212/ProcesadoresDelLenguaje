@@ -1,0 +1,90 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+terminal                                    ASIG, ALL, CLL, AP, CP, AC, CC, COMA, PYC, MAS, MENOS, POR, DIV, MENOSU;
+terminal String                             IDENT, INVERSA, ADJUNTA, TRANSPUESTA, PRINT;
+terminal Double                             NUMERO;
+
+non terminal                                lista_sent, sent;
+non terminal ArrayList<Double>              fila, fila_java;
+non terminal ArrayList<ArrayList<Double>>   exp, mat, filas, mat_java, filas_java;
+
+precedence left       MENOS, MAS; 
+precedence left       POR;
+precedence nonassoc   MENOSU;
+
+lista_sent ::= sent lista_sent
+             | sent
+             ;
+
+sent ::= PRINT AP exp:e CP PYC     {: Matrices.print(e); :}
+       | IDENT:i ASIG exp:e PYC    {: TablaSimbolos.insertar(i, Matrices.toArray(e)); :}
+       ;
+
+exp ::= mat:m                      {: RESULT = m; :}
+      | mat_java:m                 {: RESULT = m; :}
+      | exp:e1 MAS exp:e2          {: if ( Matrices.columnas(Matrices.toArray(e1)) == Matrices.columnas(Matrices.toArray(e2)) &&
+                                           Matrices.filas(Matrices.toArray(e1)) == Matrices.filas(Matrices.toArray(e2)) ) {
+                                              RESULT = Matrices.toArrayList(Matrices.suma(Matrices.toArray(e1), Matrices.toArray(e2)));
+                                      } else {
+                                          System.out.println(Matrices.ERROR_SUMA);
+                                          System.exit(-1);
+                                      }
+                                   :}
+      | exp:e1 MENOS exp:e2        
+      | exp:e1 POR exp:e2          {: if ( Matrices.columnas(Matrices.toArray(e1)) == Matrices.filas(Matrices.toArray(e2))) {
+                                              RESULT = Matrices.toArrayList(Matrices.producto(Matrices.toArray(e1), Matrices.toArray(e2)));
+                                      } else {
+                                          System.out.println(Matrices.ERROR_PROD);
+                                          System.exit(-1);
+                                      }
+                                   :}
+      | MENOS exp:e
+        %prec MENOSU
+      | AP exp:e CP                {: RESULT = e; :}
+      | INVERSA AP exp:e CP        {: if ( Matrices.columnas(Matrices.toArray(e)) == Matrices.filas(Matrices.toArray(e))) {
+                                              RESULT = Matrices.toArrayList(Matrices.inversa(Matrices.toArray(e)));
+                                      } else {
+                                          System.out.println(Matrices.ERROR_INVERSA);
+                                          System.exit(-1);
+                                      }
+                                   :}
+      | ADJUNTA AP exp:e CP        {: if ( Matrices.columnas(Matrices.toArray(e)) == Matrices.filas(Matrices.toArray(e))) {
+                                              RESULT = Matrices.toArrayList(Matrices.adjunta(Matrices.toArray(e)));
+                                      } else {
+                                          System.out.println(Matrices.ERROR_ADJUNTA);
+                                          System.exit(-1);
+                                      }
+                                   :}
+      | TRANSPUESTA AP exp:e CP    {: RESULT = Matrices.toArrayList(Matrices.transpuesta(Matrices.toArray(e))); :}
+      | IDENT:i                    {: double[][] aux = TablaSimbolos.buscar(i);
+                                      if (aux==null) {
+                                          System.out.println(TablaSimbolos.ERROR_NOEXISTE);
+                                          System.exit(-1);
+                                      } else {
+                                          RESULT = Matrices.toArrayList(aux);
+                                      }
+                                   :}
+      ;
+
+mat ::= AC filas:f CC              {: RESULT = f; :};
+
+filas ::= fila:f                   {: RESULT = new ArrayList(); RESULT.add(f); :}
+        | filas:f2 PYC fila:f1     {: if (f2.get(0).size() == f1.size()) { f2.add(f1); RESULT = f2; }
+                                      else { System.out.println(Matrices.ERROR_FILAS); System.exit(-1); } :}
+        ;
+
+fila ::= NUMERO:n                  {: RESULT = new ArrayList(); RESULT.add(n); :}
+       | fila:f COMA NUMERO:n      {: f.add(n); RESULT = f; :}
+       ;
+
+mat_java ::= ALL filas_java:f CLL  {: RESULT = f; :};
+
+filas_java ::= ALL fila_java:f CLL                       {: RESULT = new ArrayList(); RESULT.add(f); :}
+             | filas_java:f2 COMA ALL fila_java:f1 CLL   {: if (f2.get(0).size() == f1.size()) { f2.add(f1); RESULT = f2; }
+                                                            else { System.out.println(Matrices.ERROR_FILAS); System.exit(-1); } :}
+             ;
+
+fila_java ::= NUMERO:n                       {: RESULT = new ArrayList(); RESULT.add(n); :}
+            | fila_java:f COMA NUMERO:n      {: f.add(n); RESULT = f; :}
+            ;
