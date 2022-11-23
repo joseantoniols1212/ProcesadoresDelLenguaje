@@ -1,0 +1,16 @@
+import java_cup.runtime.*;
+
+terminal String                   CLOSE_TAG, OPEN_TAG, TEXT;
+
+non terminal                      json;
+non terminal String               pair, pair_list, item_list, item;
+
+json ::= pair_list:l       {: System.out.println("{\n"+l+"\n}"); :};
+
+pair ::= OPEN_TAG:o TEXT:t CLOSE_TAG:c                {: RESULT = o+": "+t; :}  // Comprobar o == c
+       | OPEN_TAG:o pair_list:l CLOSE_TAG:c           {: RESULT = o+": {\n"+l+"\n}"; :}
+       ;
+
+pair_list ::= pair:p                                  {: RESULT = p; :}
+            | pair:p pair_list:l                      {: RESULT = p+",\n"+l; :}
+            ;
