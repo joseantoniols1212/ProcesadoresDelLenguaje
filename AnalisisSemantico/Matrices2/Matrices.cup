@@ -1,0 +1,118 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+terminal                                    ASIG, ALL, CLL, AP, CP, AC, CC, COMA, PYC, MAS, MENOS, POR, DIV, CONCATENA;
+terminal String                             IDENT, PRINT, TRANSPUESTA, ADJUNTA, INVERSA;
+terminal Double                             NUMERO;
+terminal double[]                           VECTOR;
+terminal double[][]                         MATRIZ;
+
+non terminal                                lista_sent, sent;
+non terminal Double                         num;
+non terminal double[][]                     mat;
+non terminal double[]                       vec;
+non terminal ArrayList<Double>              lista_nums;
+non terminal ArrayList<ArrayList<Double>>   lista_vecs;
+
+precedence left       MAS;
+precedence left       POR;
+precedence left       CONCATENA;
+
+lista_sent ::= sent lista_sent
+             | sent
+             ;
+
+sent ::= PRINT AP mat:e CP PYC     {: Matrices.print(e); :}
+       | PRINT AP vec:e CP PYC     {: Matrices.print(e); :}
+       | IDENT:i ASIG vec:v PYC    {: TablaSimbolos.insertarVector(i, v); :}
+       | IDENT:i ASIG mat:m PYC    {: TablaSimbolos.insertar(i, m); :}
+       | IDENT:i AP NUMERO:n1 COMA NUMERO:n2 CP ASIG mat:m PYC    {: TablaSimbolos.insertar(i, Matrices.completar(m,n1.intValue(),n2.intValue())); :}
+       ;
+
+mat ::= ALL lista_vecs:l CLL       {: RESULT = Matrices.toArray(l); :}
+      | mat:m1 MAS mat:m2          {: if(Matrices.filas(m1)==Matrices.filas(m2) && Matrices.columnas(m1)==Matrices.columnas(m2)){
+                                          RESULT = Matrices.suma(m1, m2);
+                                      } else {
+                                          System.out.println(Matrices.ERROR_SUMA);
+                                          System.exit(0);
+                                      }
+                                   :}
+      | mat:m1 POR mat:m2          {: if(Matrices.columnas(m1) == Matrices.filas(m2)){
+                                          RESULT = Matrices.producto(m1, m2);
+                                      } else {
+                                          System.out.println(Matrices.ERROR_PROD);
+                                          System.exit(0);
+                                   }:}
+      | mat:m POR vec:v            {: if(Matrices.columnas(m) == Matrices.dim(v)) {
+                                          RESULT = Matrices.producto(m, v);
+                                      } else {
+                                          System.out.println(Matrices.ERROR_PROD);
+                                          System.exit(0);
+                                      }
+                                   :}
+      | vec:v POR mat:m            {: if(Matrices.filas(m) == Matrices.dim(v)) {
+                                          RESULT = Matrices.producto(v, m);
+                                      } else {
+                                          System.out.println(Matrices.ERROR_PROD);
+                                          System.exit(0);
+                                      }
+                                   :}
+      | vec:v1 POR vec:v2          {: if(Matrices.dim(v1) == Matrices.dim(v2)) {
+                                          RESULT = Matrices.producto(v1, v2);
+                                      } else {
+                                          System.out.println(Matrices.ERROR_PROD);
+                                          System.exit(0);
+                                      }
+                                   :}
+      | mat:m CONCATENA vec:v      {: if(Matrices.filas(m) == Matrices.dim(v)) {
+                                          RESULT = Matrices.concatena(m, v);
+                                      } else {
+                                          System.out.println("ERROR: La operacion concatena() requiere coincidencia de filas de matriz y dimension de vector.");
+                                          System.exit(0);
+                                   }:}
+      | MATRIZ:m                   {: RESULT = m; :}
+      | MATRIZ:m AP NUMERO:n1 COMA NUMERO:n2 CP   {: if(Matrices.filas(m) < n1) {
+                                                      System.out.println(Matrices.ERROR_FILAS_INSUF);
+                                                      System.exit(0);
+                                                  } else if (Matrices.columnas(m) < n2) {
+                                                      System.out.println(Matrices.ERROR_COLUM_INSUF);
+                                                      System.exit(0);
+                                                  } else {
+                                                      RESULT = Matrices.subMatriz(m, n1.intValue(), n2.intValue());
+                                                  }
+                                               :}
+      ;
+
+vec ::= ALL CLL                    {: RESULT = new double[]{}; :}
+      | ALL lista_nums:l CLL       {: RESULT = Matrices.toVector(l); :}
+      | vec:v CONCATENA num:n      {: RESULT = Matrices.concatena(v, n); :}
+      | num:n CONCATENA vec:v      {: RESULT = Matrices.concatena(n, v); :}
+      | vec:v1 CONCATENA vec:v2    {: RESULT = Matrices.concatena(v1, v2); :}
+      | vec:v1 MAS vec:v2          {: if(Matrices.dim(v1)==Matrices.dim(v2)){
+                                          RESULT = Matrices.suma(v1, v2);
+                                      } else {
+                                          System.out.println("ERROR: La operacion suma() requiere vectores de iguales dimensiones");
+                                          System.exit(0);
+                                      }
+                                   :}
+      | VECTOR:v                   {: RESULT = v; :}
+      | VECTOR:v AP NUMERO:n CP    {: if(Matrices.dim(v) <= n) {
+                                          System.out.println("ERROR: vector de dimension insuficiente.");
+                                          System.exit(0);
+                                      } else {
+                                        RESULT = Matrices.subVector(v, n.intValue());
+                                      }
+                                   :}
+      ;
+
+lista_nums ::= num:n                       {: RESULT = new ArrayList(); RESULT.add(n); :}
+             | lista_nums:l COMA num:n     {: RESULT = l; RESULT.add(n); :}
+             ;
+
+lista_vecs ::= vec:v                          {: RESULT = new ArrayList(); RESULT.add(Matrices.toArrayList(v)); :}
+             | lista_vecs:l COMA vec:v        {: RESULT = l; RESULT.add(Matrices.toArrayList(v)); :}
+             ;
+
+num ::= NUMERO:n            {: RESULT = n; :}
+      | MENOS NUMERO:n      {: RESULT = -n; :}
+      ;
