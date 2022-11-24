@@ -1,0 +1,21 @@
+import java_cup.runtime.*;
+
+terminal                            INT, DOUBLE, PYC;
+terminal String                     IDENT;
+
+non terminal                        lista_sent, sent;
+non terminal String                 lista_int, lista_double;
+
+lista_sent ::= sent lista_sent;
+
+sent ::= INT lista_int PYC
+       | DOUBLE lista_double PYC
+       ;
+
+lista_int ::=  lista_int IDENT:i          {: Test.out.print(" "+i+":int;"); :}
+              | IDENT:i                  {: Test.out.print(i+":int;\n"); :}
+              ;
+
+lista_double ::= lista_double IDENT:i          {: Test.out.print(" "+i+":double;"); :}
+              | IDENT:i                  {: Test.out.print(i+":double;\n"); :}
+              ;

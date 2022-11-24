@@ -1,0 +1,13 @@
+import java_cup.runtime.*;
+
+terminal String                 IDENT, NUMERO;
+
+non terminal String             lista, elem;
+
+lista ::= elem:e lista:l       {: Test.out.print(" "+e); :}
+        | elem:e               {: Test.out.print(e); :}
+        ;
+
+elem ::= IDENT:a               {: RESULT = a; :}
+       | NUMERO:a              {: RESULT = a; :}
+       ;
