@@ -1,0 +1,21 @@
+import java_cup.runtime.*;
+
+terminal MAS, MENOS, POR, DIV, AP, CP;
+terminal String NUMERO, IDENT;
+
+non terminal print;
+non terminal String exp;
+
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+
+print ::= exp:e                     {: Test.out.println(e); :};
+
+exp ::= exp:e1 MAS exp:e2           {: RESULT = e1+" "+e2+" +"; :}
+      | exp:e1 MENOS exp:e2         {: RESULT = e1+" "+e2+" -"; :}
+      | exp:e1 POR exp:e2           {: RESULT = e1+" "+e2+" *"; :}
+      | exp:e1 DIV exp:e2           {: RESULT = e1+" "+e2+" /"; :}
+      | AP exp:e CP                 {: RESULT = e; :}
+      | NUMERO:n                    {: RESULT = n; :}
+      | IDENT:i                     {: RESULT = i; :}
+      ;

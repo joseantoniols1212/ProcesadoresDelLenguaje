@@ -3,19 +3,17 @@ import java_cup.runtime.*;
 terminal                            INT, DOUBLE, PYC;
 terminal String                     IDENT;
 
-non terminal                        lista_sent, sent;
+non terminal                        sent;
 non terminal String                 lista_int, lista_double;
 
-lista_sent ::= sent lista_sent;
-
-sent ::= INT lista_int PYC
-       | DOUBLE lista_double PYC
+sent ::= INT lista_int:l PYC                {: Test.out.println(l); :}
+       | DOUBLE lista_double:l PYC          {: Test.out.println(l); :}
        ;
 
-lista_int ::=  lista_int IDENT:i          {: Test.out.print(" "+i+":int;"); :}
-              | IDENT:i                  {: Test.out.print(i+":int;\n"); :}
-              ;
+lista_int ::= IDENT:i lista_int:l {: RESULT = i+":int; "+l; :}
+            | IDENT:i {: RESULT = i+":int;"; :}
+            ;
 
-lista_double ::= lista_double IDENT:i          {: Test.out.print(" "+i+":double;"); :}
-              | IDENT:i                  {: Test.out.print(i+":double;\n"); :}
-              ;
+lista_double ::= IDENT:i lista_double:l {: RESULT = i+":double; "+l; :}
+            | IDENT:i {: RESULT = i+":double;"; :}
+            ;

@@ -1,0 +1,14 @@
+import java_cup.runtime.*;
+
+terminal String IDENT;
+terminal INT, DOUBLE, PYC, COMA, DP;
+
+non terminal lista_var, program;
+
+program ::= {: Test.out.print("int "); :} lista_var DP INT PYC
+          | {: Test.out.print("double "); :} lista_var DP INT PYC
+          ;
+
+lista_var ::= IDENT
+            | lista_var COMA IDENT 
+            ;

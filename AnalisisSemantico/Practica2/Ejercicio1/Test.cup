@@ -1,0 +1,19 @@
+import java_cup.runtime.*;
+
+terminal Integer NUMERO;
+
+non terminal Integer[] lista;
+non terminal program;
+
+program ::= lista             {: Test.out.println("SI"); :};
+
+lista ::= NUMERO:n1 NUMERO:n2 {: RESULT = new Integer[2]; RESULT[0] = n1; RESULT[1] = n2; :}
+        | lista:l NUMERO:n    {: if (l[0]+l[1]!=n) {
+                                    Test.out.println("NO"); 
+                                    System.exit(0);
+                                 } 
+                                 RESULT = new Integer[2];
+                                 RESULT[0]=l[1];
+                                 RESULT[1]=n;
+                              :}
+        ;
