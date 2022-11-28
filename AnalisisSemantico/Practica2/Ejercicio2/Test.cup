@@ -1,14 +1,16 @@
 import java_cup.runtime.*;
+import java.util.ArrayList;
 
 terminal String IDENT;
 terminal INT, DOUBLE, PYC, COMA, DP;
 
-non terminal lista_var, program;
+non terminal programa;
+non terminal ArrayList<String> lista;
 
-program ::= {: Test.out.print("int "); :} lista_var DP INT PYC
-          | {: Test.out.print("double "); :} lista_var DP INT PYC
-          ;
+programa ::= lista:l DP INT PYC          {: for(String s : l) Test.out.print(s+":int;"); :}
+           | lista:l DP DOUBLE PYC       {: for(String s : l) Test.out.print(s+":double;"); :}
+           ;
 
-lista_var ::= IDENT
-            | lista_var COMA IDENT 
-            ;
+lista ::= IDENT:i                  {: RESULT = new ArrayList(); RESULT.add(i); :}
+        | lista:l COMA IDENT:i     {: l.add(i); RESULT = l; :}
+        ;
