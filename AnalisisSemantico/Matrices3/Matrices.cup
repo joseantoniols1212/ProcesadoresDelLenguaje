@@ -1,0 +1,66 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+terminal                                    ASIG, ALL, CLL, AP, CP, AC, CC, COMA, PYC, MAS, MENOS, POR, DIV, CONCATENA, INTERSECCION;
+terminal                                    SET;
+terminal String                             IDENT, PRINT, TRANSPUESTA, ADJUNTA, INVERSA;
+terminal Double                             NUMERO;
+terminal double[]                           VECTOR, CONJUNTO;
+terminal double[][]                         MATRIZ;
+
+non terminal                                lista_sent, sent;
+non terminal Double                         num;
+non terminal double[]                       vec, set;
+non terminal ArrayList<Double>              lista_nums;
+
+precedence left       MAS;
+precedence left       CONCATENA;
+precedence left       INTERSECCION; 
+precedence right      SET; 
+
+lista_sent ::= sent lista_sent
+             | sent
+             ;
+
+sent ::= PRINT AP set:e CP PYC     {: Matrices.print(e); :}
+       | PRINT AP vec:e CP PYC          {: Matrices.print(e); :}
+       | IDENT:i ASIG vec:v PYC         {: TablaSimbolos.insertarVector(i, v); :}
+       | IDENT:i ASIG set:c PYC    {: TablaSimbolos.insertarConjunto(i, c); :}
+       ;
+
+vec ::= ALL CLL                         {: RESULT = new double[]{}; :}
+      | ALL lista_nums:l CLL            {: RESULT = Matrices.toVector(l); :}
+      | vec:v CONCATENA num:n           {: RESULT = Matrices.concatena(v, n); :}
+      | num:n CONCATENA vec:v           {: RESULT = Matrices.concatena(n, v); :}
+      | vec:v CONCATENA set:s           {: RESULT = Matrices.concatena(v, s); :}
+      | set:s CONCATENA vec:v           {: RESULT = Matrices.concatena(s, v); :}
+      | vec:v1 CONCATENA vec:v2         {: RESULT = Matrices.concatena(v1, v2); :}
+      | vec:v1 MAS vec:v2               {: if(Matrices.dim(v1)==Matrices.dim(v2)){
+                                               RESULT = Matrices.suma(v1, v2);
+                                           } else {
+                                               System.out.println("ERROR: La operacion suma() requiere vectores de iguales dimensiones");
+                                               System.exit(0);
+                                           }
+                                        :}
+      | VECTOR:v                        {: RESULT = v; :}
+      | AP vec:v CP                     {: RESULT = v; :}
+      ;
+
+set ::= SET vec:v                       {: RESULT = Matrices.toSet(v); :}
+           | CONJUNTO:c                 {: RESULT = c; :}
+           | SET set:s                  {: RESULT = s; :}
+           | set:s1 CONCATENA set:s2    {: RESULT = Matrices.union(s1, s2); :}
+           | set:s1 INTERSECCION set:s2 {: RESULT = Matrices.interseccion(s1, s2); :}
+           | vec:v1 INTERSECCION vec:v2 {: RESULT = Matrices.interseccion(v1, v2); :}
+           | vec:v INTERSECCION set:s   {: RESULT = Matrices.interseccion(v, s); :}
+           | set:s INTERSECCION vec:v   {: RESULT = Matrices.interseccion(s, v); :}
+           | AP set:s CP                {: RESULT = s; :}
+           ;
+
+lista_nums ::= num:n                       {: RESULT = new ArrayList(); RESULT.add(n); :}
+             | lista_nums:l COMA num:n     {: RESULT = l; RESULT.add(n); :}
+             ;
+
+num ::= NUMERO:n            {: RESULT = n; :}
+      | MENOS NUMERO:n      {: RESULT = -n; :}
+      ;

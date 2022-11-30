@@ -1,0 +1,38 @@
+import java_cup.runtime.*;
+
+terminal ALL, CLL, COMA;
+terminal Integer NUMERO;
+
+non terminal Arbol nodo;
+
+nodo ::= NUMERO:n  
+{: 
+  RESULT = new Arbol();
+  RESULT.raiz = n;
+  RESULT.maximo = n;
+  RESULT.profundidad = 1;
+  RESULT.elementos = 1;
+  RESULT.sumaNivel[0] = n;
+  RESULT.arbolInverso = n.toString();
+  RESULT.grafo = "";
+:}
+       | ALL nodo:n1 COMA NUMERO:n COMA nodo:n2 CLL   
+{:
+  RESULT = new Arbol();
+  RESULT.raiz = n;
+  RESULT.maximo = Math.max(Math.max(n1.maximo, n2.maximo), n);
+  RESULT.profundidad = Math.max(n1.profundidad, n2.profundidad)+1;
+  RESULT.elementos = n1.elementos + n2.elementos +1;
+
+  RESULT.sumaNivel[0] = n;
+  int aux1, aux2;
+  for(int i = 0; i < RESULT.sumaNivel.length-1 && (n1.sumaNivel[i] != null || n2.sumaNivel[i] != null); i++){
+      aux1 = n1.sumaNivel[i]==null? 0 : n1.sumaNivel[i];
+      aux2 = n2.sumaNivel[i]==null? 0 : n2.sumaNivel[i];
+      RESULT.sumaNivel[i+1] = aux1 + aux2; 
+  }
+  
+  RESULT.arbolInverso = "{"+n2.arbolInverso+","+n.toString()+","+n1.arbolInverso+"}";
+  RESULT.grafo = n1.grafo+" "+n.toString()+"-> {"+n1.raiz+","+n2.raiz+"};"+n2.grafo;
+:}
+       ;

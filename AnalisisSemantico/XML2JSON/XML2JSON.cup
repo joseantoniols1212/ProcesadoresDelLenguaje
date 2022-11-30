@@ -1,16 +1,50 @@
 import java_cup.runtime.*;
+import java.util.ArrayList;
 
-terminal String                   CLOSE_TAG, OPEN_TAG, TEXT;
+action code {:
 
-non terminal                      json;
-non terminal String               pair, pair_list, item_list, item;
+  private boolean esLista(String e) {
+    return e.charAt(e.length()-1) == 's';
+  }
 
-json ::= pair_list:l       {: System.out.println("{\n"+l+"\n}"); :};
+  private String hacerLista(ArrayList<String[]> l) {
+      if(l.size()==1 && l.get(0)==null) return "[]";
+      String res = "[";
+      for(int i = 0; i < l.size()-1; i++) res = res+l.get(i)[1]+",";
+      return res+l.get(l.size()-1)[1]+"]";
+  }
 
-pair ::= OPEN_TAG:o TEXT:t CLOSE_TAG:c                {: RESULT = o+": "+t; :}  // Comprobar o == c
-       | OPEN_TAG:o pair_list:l CLOSE_TAG:c           {: RESULT = o+": {\n"+l+"\n}"; :}
+  private String hacerPareja(ArrayList<String[]> l) {
+      String res = "{";
+      for(int i = 0; i < l.size()-1; i++) res = res+l.get(i)[0]+": "+l.get(i)[1]+",";
+      return res+l.get(l.size()-1)[0]+": "+l.get(l.size()-1)[1]+"}";
+  }
+
+:}
+
+terminal DP, PYC, COMA;
+terminal String OPEN_TAG, CLOSE_TAG, TEXT;
+
+non terminal program;
+non terminal String[] pair;
+non terminal ArrayList<String[]> pair_list;
+
+program ::= pair_list:l                             {: System.out.println(hacerPareja(l)); :};
+
+pair ::= OPEN_TAG:o TEXT:t CLOSE_TAG:c              {: RESULT = new String[2]; RESULT[0]=o; RESULT[1] = t; :}  // No se comprueban si las tags coinciden
+       | OPEN_TAG:o CLOSE_TAG:c                     {: RESULT = new String[2]; RESULT[0]=o.substring(0, o.length()-1); RESULT[1]="[]"; :} //Presuponemos que cualquier tag vacia va a ser lista vacia
+       | OPEN_TAG:o pair_list:l CLOSE_TAG:c         {: RESULT = new String[2];
+                                                       if(esLista(o)) {
+                                                          RESULT[0]=o.substring(0, o.length()-1);
+                                                          RESULT[1]=hacerLista(l);
+                                                       } else {
+                                                          RESULT[0] = o;
+                                                          RESULT[1]=hacerPareja(l);
+                                                       }
+                                                    :}
        ;
 
-pair_list ::= pair:p                                  {: RESULT = p; :}
-            | pair:p pair_list:l                      {: RESULT = p+",\n"+l; :}
+
+pair_list ::= pair:p                                {: RESULT = new ArrayList(); RESULT.add(p); :}
+            | pair_list:l pair:p                    {: RESULT = l; RESULT.add(p); :}
             ;
