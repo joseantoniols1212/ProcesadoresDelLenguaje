@@ -11,6 +11,7 @@ private static Symbol leer() {
 	int token = 0;
 	try {
 		simbolo = lex.yylex();
+		// System.out.println(simbolo.lexema());
 		if (simbolo == null) {
 			simbolo = new Symbol(Symbol.EOF, null);
 		}
@@ -50,11 +51,11 @@ public static void main(String[] arg) {
 // ---------------------------------------------------+--------------------------------
 // axioma -> lineas EOF                               |  num, (, -, EOF
 // lineas -> exp EOLN lineas | epsilon| EOLN exp      |  num, (, - | EOF | EOLN
-// exp    -> TE | -exp                                |  num, ( | -
-// E      -> epsilon | +TE | -TE                      |  EOLN | + | -
-// T      -> FQ                                       |  num, (
-// Q      -> epsilon | *FQ | /FQ                      |  +,-,EOLN | * | /
-// F      -> num | (linea)                            |  num | (
+// exp    -> TE                                       |  num, (, -
+// E      -> epsilon | +TE | -TE                      |  EOLN,) | + | -
+// T      -> FQ                                       |  num, (, -
+// Q      -> epsilon | *FQ | /FQ                      |  +, -, EOLN, ) | * | /
+// F      -> num | (exp) | -F                         |  num | ( | -
 
   private static void axioma(){
     switch (simbolo.token()){
@@ -76,12 +77,12 @@ public static void main(String[] arg) {
       case Symbol.MENOS:
       case Symbol.NUMERO:
         System.out.println((int)linea());
-        simbolo = leer();
+        simbolo = leer(); // quitamos EOLN
         lineas();
         break;
       case Symbol.EOLN:
         System.out.println();
-        simbolo = leer();
+        simbolo = leer(); // quitamos EOLN
         lineas();
         break;
       case Symbol.EOF:
@@ -94,11 +95,9 @@ public static void main(String[] arg) {
   private static float linea(){
     switch (simbolo.token()){
       case Symbol.AP:
+      case Symbol.MENOS:
       case Symbol.NUMERO:
         return t()+e();
-      case Symbol.MENOS:
-        simbolo = leer();
-        return -linea();
       default:
         error();
     }
@@ -106,17 +105,24 @@ public static void main(String[] arg) {
   }
 
   private static float f() {
+    float res = 0;
     switch (simbolo.token()){
       case Symbol.NUMERO:
-      case Symbol.AP:
-        return g();
-      case Symbol.MENOS:
+        res = Float.parseFloat(simbolo.lexema());
         simbolo = leer();
+        break;
+      case Symbol.AP:
+        simbolo = leer();
+        res = linea();
+        simbolo = leer();
+        break;
+      case Symbol.MENOS:
+        simbolo = leer(); // quitamos el menos
         return -f();
       default:
         error();
     }
-    return 0;
+    return res;
   }
 
   private static float e() {
@@ -128,6 +134,7 @@ public static void main(String[] arg) {
         simbolo=leer();
         return -t()+e();
       case Symbol.EOLN:
+      case Symbol.CP:
         return 0;
       default: error();
     }
@@ -155,30 +162,14 @@ public static void main(String[] arg) {
         simbolo = leer();
         return 1/f()*q();
       case Symbol.MAS:
+      case Symbol.MENOS:
       case Symbol.EOLN:
+      case Symbol.CP:
         return 1;
       default:
         error();
     }
     return 0;
-  }
-
-  private static float g() {
-    float res = 0;
-    switch (simbolo.token()){
-      case Symbol.NUMERO:
-        res = Float.parseFloat(simbolo.lexema());
-        simbolo = leer();
-        break;
-      case Symbol.AP:
-        simbolo = leer();
-        res = linea();
-        simbolo = leer();
-        break;
-      default:
-        error();
-    }
-    return res;
   }
 
 }
