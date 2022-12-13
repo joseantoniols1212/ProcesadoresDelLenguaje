@@ -1,0 +1,41 @@
+import java_cup.runtime.*;
+import java.util.HashMap;
+
+action code {:
+
+  public HashMap<String, String> tablaSimbolos = new HashMap<String,String>();
+
+:};
+
+terminal                                    AP, CP, COMA, PYC, PUNTO, MAS, MENOS, IGUAL;
+terminal                                    PRINT, SUBSTR, SIZE;
+terminal Integer                            NUMERO;
+terminal String                             CADENA, ID;
+
+non terminal                                lista_sent, sent;
+non terminal String                         cad;
+non terminal Integer                        num;
+
+precedence left MAS, MENOS;
+precedence left PUNTO;
+
+lista_sent ::= sent lista_sent
+             | sent
+             ;
+
+sent ::= PRINT AP cad:c CP PYC     {: Cadenas.out.println(c); :}
+       | ID:i IGUAL cad:c PYC      {: tablaSimbolos.put(i,c); :}
+       ;
+
+cad ::= CADENA:c {: RESULT = c; :}
+      | ID:i {: RESULT = tablaSimbolos.get(i); :}
+      | cad:c1 MAS cad:c2 {: RESULT = c1 + c2; :}
+      | cad:c PUNTO SUBSTR AP num:n1 COMA num:n2 CP {: RESULT = c.substring(n1, n2+n1); :}
+      | AP cad:c CP {:RESULT = c;:}
+      ;
+
+num ::= NUMERO:n {: RESULT = n; :}
+      | cad:c PUNTO SIZE AP CP {: RESULT = c.length(); :}
+      | num:n1 MAS num:n2 {: RESULT = n1+n2; :}
+      | num:n1 MENOS num:n2 {: RESULT = n1-n2; :}
+      ;
