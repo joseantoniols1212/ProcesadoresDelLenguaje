@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name="$(basename "$PWD")"
+name="PLC"
 
 # Compilamos los archivos
 jflex $name.flex
