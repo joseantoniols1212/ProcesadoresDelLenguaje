@@ -1,0 +1,75 @@
+import java_cup.runtime.*;
+
+terminal String IDENT, ENTERO;
+terminal String MAYOR, MENOR, IGUAL, DISTINTO, MAYORIGUAL, MENORIGUAL;
+terminal MAS, MENOS, UMENOS, POR, DIV, ASIG;
+terminal NOT, AND, OR;
+terminal IF, ELSE, DO, WHILE, FOR, PRINT;
+terminal AP, CP, ALL, CLL, PYC;
+
+non terminal String comparationOp;
+non terminal AST.ConditionNode condicion;
+non terminal AST.ExpresionNode exp;
+non terminal AST.SentenceNode sent;
+non terminal AST.BranchNode bucle;
+non terminal AST.FunctionNode funcion;
+non terminal AST.SentencesListNode lista_sent, program;
+
+precedence left MENOS, MAS;
+precedence left OR;
+precedence left AND;
+precedence left IGUAL, DISTINTO;
+precedence left MENOR, MAYOR, MENORIGUAL, MAYORIGUAL;
+precedence left POR, DIV;
+precedence right UMENOS, NOT;
+
+precedence right ELSE;
+
+program ::= lista_sent:l                            {: RESULT = l; :};
+
+lista_sent ::= sent:s                               {: RESULT = new AST.SentencesListNode(); RESULT.add(s); :}
+             | lista_sent:l sent:s                  {: RESULT = l; RESULT.add(s); :}
+             ;
+
+sent ::= exp:e PYC                                   {: RESULT = new AST.BasicSentenceNode(e); :}
+       | bucle:b                                     {: RESULT = b; :}
+       | funcion:f                                   {: RESULT = f; :}
+       | ALL lista_sent:l CLL                        {: RESULT = l; :}
+       ;
+
+bucle ::= IF AP condicion:c CP sent:s                            {: RESULT = new AST.IfNode(s, c); :}
+        | IF AP condicion:c CP sent:s1 ELSE sent:s2              {: RESULT = new AST.IfElseNode(s1, c, s2); :}
+        | WHILE AP condicion:c CP sent:s                         {: RESULT = new AST.WhileNode(s, c); :}
+        | DO sent:s WHILE AP condicion:c CP PYC                  {: RESULT = new AST.DoWhileNode(s, c); :}
+        | FOR AP exp:e1 PYC condicion:c PYC exp:e2 CP sent:s     {: RESULT = new AST.ForNode(s, c, e1, e2); :}
+        ;
+        
+funcion ::= PRINT AP exp:e CP PYC       {: RESULT = new AST.FunctionNode("print",e); :}
+          ;
+
+exp ::= exp:e1 MAS:o exp:e2        {: RESULT = new AST.BinaryExpresionNode("+", e1, e2); :}
+      | exp:e1 MENOS:o exp:e2      {: RESULT = new AST.BinaryExpresionNode("-", e1, e2); :}
+      | exp:e1 POR:o exp:e2        {: RESULT = new AST.BinaryExpresionNode("*", e1, e2); :}
+      | exp:e1 DIV:o exp:e2        {: RESULT = new AST.BinaryExpresionNode("/", e1, e2); :}
+      | MENOS exp:e                {: RESULT = new AST.UnaryExpresionNode("-",e); :}
+        %prec UMENOS
+      | AP exp:e CP                {: RESULT = e; :}
+      | IDENT:i ASIG exp:e         {: RESULT = new AST.AsignationExpresionNode(i,e); :}
+      | IDENT:i                    {: RESULT = new AST.BasicExpresionNode(i); :}
+      | ENTERO:n                   {: RESULT = new AST.BasicExpresionNode(n); :}
+      ;
+
+condicion ::= exp:e1 comparationOp:o exp:e2        {: RESULT = new AST.ComparationNode(o, e1, e2);:}
+            | NOT condicion:c                      {: c.not(); RESULT = c; :}
+            | condicion:c1 AND condicion:c2        {: RESULT = new AST.BinaryConditionNode("&&", c1, c2); :}
+            | condicion:c1 OR condicion:c2         {: RESULT = new AST.BinaryConditionNode("OR", c1, c2); :}
+            | AP condicion:c CP                    {: RESULT = c; :}
+            ;
+
+comparationOp ::= IGUAL:o                {: RESULT = o; :}
+                | DISTINTO:o             {: RESULT = o; :}
+                | MAYOR:o                {: RESULT = o; :}
+                | MENOR:o                {: RESULT = o; :}
+                | MENORIGUAL:o           {: RESULT = o; :}
+                | MAYORIGUAL:o           {: RESULT = o; :}
+                ;
