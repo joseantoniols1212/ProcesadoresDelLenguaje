@@ -1,6 +1,7 @@
 import java_cup.runtime.*;
 
-terminal String IDENT, ENTERO;
+terminal Integer ENTERO;
+terminal String IDENT;
 terminal String MAYOR, MENOR, IGUAL, DISTINTO, MAYORIGUAL, MENORIGUAL;
 terminal MAS, MENOS, UMENOS, POR, DIV, ASIG;
 terminal NOT, AND, OR;
@@ -56,7 +57,7 @@ exp ::= exp:e1 MAS:o exp:e2        {: RESULT = new AST.BinaryExpresionNode("+", 
       | AP exp:e CP                {: RESULT = e; :}
       | IDENT:i ASIG exp:e         {: RESULT = new AST.AsignationExpresionNode(i,e); :}
       | IDENT:i                    {: RESULT = new AST.BasicExpresionNode(i); :}
-      | ENTERO:n                   {: RESULT = new AST.BasicExpresionNode(n); :}
+      | ENTERO:n                   {: RESULT = new AST.BasicExpresionNode(n.toString()); :}
       ;
 
 condicion ::= exp:e1 comparationOp:o exp:e2        {: RESULT = new AST.ComparationNode(o, e1, e2);:}

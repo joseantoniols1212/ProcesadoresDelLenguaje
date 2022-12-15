@@ -80,8 +80,7 @@ public class AST {
         
         ExpresionNode expresion;
 
-        public AsignationExpresionNode(String variableName, ExpresionNode expresion) {
-            super(variableName);
+        public AsignationExpresionNode(String variableName, ExpresionNode expresion) { super(variableName);
             this.expresion = expresion;
         }
     }
@@ -247,6 +246,7 @@ public class AST {
         }
         public void traverseAST(Node root){
           String className = root.getClass().getSimpleName();
+          // AST.out.println(className);
           if(className.equals("FunctionNode")) visit((FunctionNode) root);
           else if (className.equals("SentencesListNode")) visit((SentencesListNode) root);
           else if (className.equals("BasicSentenceNode")) visit((BasicSentenceNode) root);
@@ -294,22 +294,18 @@ public class AST {
         private void visit(ComparationNode node, String trueLabel, String falseLabel){
           traverseAST(node.firstExpresion);
           traverseAST(node.secondExpresion);
-          // TODO: hacer que funcione solo usando la operacion "<" o "=="
           if(node.operation.equals("<") || node.operation.equals("==")){
             AST.out.println("if ("+node.firstExpresion.variable+node.operation+node.secondExpresion.variable+") goto "+trueLabel+";");
             AST.out.println("goto "+falseLabel+";");
           } else if(node.operation.equals("<=") || node.operation.equals(">=")) {
-            visit(new BinaryConditionNode("||",
-                    new ComparationNode(node.operation.substring(1,2), node.firstExpresion, node.secondExpresion),
-                    new ComparationNode("==", node.firstExpresion, node.secondExpresion)
-                  ), trueLabel, falseLabel);
+            AST.out.println("if ("+node.secondExpresion.variable+"<"+node.firstExpresion.variable+") goto "+falseLabel+";");
+            AST.out.println("goto "+trueLabel+";");
           } else if(node.operation.equals(">")){
-            visit(new BinaryConditionNode("||",
-                    new ComparationNode("<", node.firstExpresion, node.secondExpresion),
-                    new ComparationNode("==", node.firstExpresion, node.secondExpresion)
-                  ), falseLabel, trueLabel);
+            AST.out.println("if ("+node.secondExpresion.variable+"<"+node.firstExpresion.variable+") goto "+trueLabel+";");
+            AST.out.println("goto "+falseLabel+";");
           } else if(node.operation.equals("!=")){
-            visit(new ComparationNode("==", node.firstExpresion, node.secondExpresion), falseLabel, trueLabel);
+            AST.out.println("if ("+node.firstExpresion.variable+"=="+node.secondExpresion.variable+") goto "+falseLabel+";");
+            AST.out.println("goto "+trueLabel+";");
           }
         }
 

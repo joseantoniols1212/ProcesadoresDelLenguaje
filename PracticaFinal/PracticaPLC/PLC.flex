@@ -31,7 +31,7 @@ while                                                 { return new Symbol(sym.WH
 for                                                   { return new Symbol(sym.FOR); }
 do                                                    { return new Symbol(sym.DO); }
 [a-zA-Z][a-zA-Z0-9]*                                  { return new Symbol(sym.IDENT, yytext()); }
-0|[1-9][0-9]*                                         { return new Symbol(sym.ENTERO, yytext()); }
+0|[1-9][0-9]*                                         { return new Symbol(sym.ENTERO, Integer.parseInt(yytext())); }
 \/\/.*											                          {  }
 \r|\n                                                 {  }
 \ |\t|\f                                              {  }
