@@ -19,10 +19,10 @@ import java_cup.runtime.*;
 // Operaciones aritmeticas, logicas y asignacion
 
 \=                                                    { return new Symbol(sym.ASIG); }
-\+                                                    { return new Symbol(sym.MAS); }
-\-                                                    { return new Symbol(sym.MENOS); }
-\*                                                    { return new Symbol(sym.POR); }
-\/                                                    { return new Symbol(sym.DIV); }
+\+                                                    { return new Symbol(sym.MAS, yytext()); }
+\-                                                    { return new Symbol(sym.MENOS, yytext()); }
+\*                                                    { return new Symbol(sym.POR, yytext()); }
+\/                                                    { return new Symbol(sym.DIV, yytext()); }
 \!                                                    { return new Symbol(sym.NOT); }
 "||"                                                  { return new Symbol(sym.OR); }
 "&&"                                                  { return new Symbol(sym.AND); }
@@ -34,8 +34,8 @@ import java_cup.runtime.*;
 "!="                                                  { return new Symbol(sym.DISTINTO, yytext()); }
 \%                                                    { return new Symbol(sym.MODULO, yytext()); }
 
-\+\+		                                    					{ return new Symbol(sym.INC); }
-\-\-		                                    					{ return new Symbol(sym.DEC); }
+\+\+		                                    					{ return new Symbol(sym.INC, yytext()); }
+\-\-		                                    					{ return new Symbol(sym.DEC, yytext()); }
 
 // Flujo de ejecucion y funciones
 

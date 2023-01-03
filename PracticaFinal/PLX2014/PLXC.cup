@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 terminal FLOAT, CHAR, INT;
 terminal Integer ENTERO;
-terminal String IDENT, CARACTER;
+terminal String IDENT, CARACTER, MAS, MENOS;
 terminal String MAYOR, MENOR, IGUAL, DISTINTO, MAYORIGUAL, MENORIGUAL;
-terminal MAS, MENOS, UMENOS, POR, DIV, ASIG, MODULO;
-terminal PREINC, PREDEC, POSTINC, POSTDEC, INC, DEC;
+terminal String POR, DIV, MODULO;
+terminal PREINC,UMENOS, ASIG, PREDEC, POSTINC, POSTDEC, INC, DEC;
 terminal NOT, AND, OR;
 terminal TO, STEP, DOWNTO;
 terminal IF, ELSE, DO, WHILE, FOR, PRINT;
@@ -28,8 +28,6 @@ precedence left IGUAL, DISTINTO;
 precedence left MENOR, MAYOR, MENORIGUAL, MAYORIGUAL;
 precedence left POR, DIV, MODULO;
 precedence right UMENOS, NOT;
-precedence right PREDEC, PREDEC;
-precedence left POSTDEC, POSTINC;
 precedence right ELSE;
 
 program ::= lista_sent:l                             {: RESULT = l; :}
@@ -77,25 +75,21 @@ funcion ::= PRINT AP exp:e CP PYC       {: RESULT = new CallNode("print", e); :}
 asignacion ::= IDENT:i ASIG exp:e  {: RESULT = new AsignationNode(i,e); :}
              ;
 
-exp ::= exp:e1 MAS:o exp:e2        {: RESULT = new BinaryOperationNode("+", e1, e2); :}
-      | exp:e1 MENOS:o exp:e2      {: RESULT = new BinaryOperationNode("-", e1, e2); :}
-      | exp:e1 POR:o exp:e2        {: RESULT = new BinaryOperationNode("*", e1, e2); :}
-      | exp:e1 DIV:o exp:e2        {: RESULT = new BinaryOperationNode("/", e1, e2); :}
+exp ::= exp:e1 MAS:o exp:e2        {: RESULT = new BinaryOperationNode(o, e1, e2); :}
+      | exp:e1 MENOS:o exp:e2      {: RESULT = new BinaryOperationNode(o, e1, e2); :}
+      | exp:e1 POR:o exp:e2        {: RESULT = new BinaryOperationNode(o, e1, e2); :}
+      | exp:e1 DIV:o exp:e2        {: RESULT = new BinaryOperationNode(o, e1, e2); :}
+      | exp:e1 MODULO:o exp:e2     {: RESULT = new BinaryOperationNode(o, e1, e2); :}
       | AP exp:e CP                {: RESULT = e; :}
-      | INC IDENT:e                {: RESULT = new UnaryOperationNode("pre++",new IdentifierNode(e)); :}
-        %prec PREINC
       | IDENT:e INC                {: RESULT = new UnaryOperationNode("post++",new IdentifierNode(e)); :}
-        %prec POSTINC
-      | DEC IDENT:e                {: RESULT = new UnaryOperationNode("pre--",new IdentifierNode(e)); :}
-        %prec PREDEC
       | IDENT:e DEC                {: RESULT = new UnaryOperationNode("post--",new IdentifierNode(e)); :}
-        %prec POSTDEC
-      | IDENT:i                    {: RESULT = new IdentifierNode(i); :}
-      | MENOS exp:e                {: RESULT = new UnaryOperationNode("-",e); :}
+      | INC IDENT:e                {: RESULT = new UnaryOperationNode("pre++",new IdentifierNode(e)); :}
+      | DEC IDENT:e                {: RESULT = new UnaryOperationNode("pre--",new IdentifierNode(e)); :}
+      | MENOS IDENT:e              {: RESULT = new UnaryOperationNode("-",new IdentifierNode(e)); :}
         %prec UMENOS
+      | IDENT:i                    {: RESULT = new IdentifierNode(i); :}
       | ENTERO:n                   {: RESULT = new ConstantNode<Integer>(n); :}
       | asignacion:a               {: RESULT = a; :}
-      | exp:e1 MODULO:o exp:e2     {: RESULT = new BinaryOperationNode("%",e1,e2); :}
       ;
 
 condicion ::= exp:e1 comparationOp:o exp:e2        {: RESULT = new ComparationNode(o, e1, e2);:}

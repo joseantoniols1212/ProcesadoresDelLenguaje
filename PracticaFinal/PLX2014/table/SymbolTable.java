@@ -21,19 +21,43 @@ public class SymbolTable {
     table.pop();
   }
 
-  public void add(String id, String type){ // Añadimos al ultimo scope
-			table.peek().put(id, type);
+  public boolean add(String id, String type){  // Devolvemos true si se añade correctamente
+      if(!inScope(id)){
+			  table.peek().put(id, type);
+        return true;
+      } else if(!inLastScope(id)){
+			  table.peek().put(id+"_"+table.size(), type);
+        return true;
+      } 
+      return false;
   }
 
-  public String get(String id){ // Devuelve el elemento de id , null si no se encuentra
+  private String getShadowed(String id){
+      id += "_"+table.size();
       for(HashMap<String, String> scope : table) {
-        if(scope.containsKey(id)) return scope.get(id);
+        if(scope.containsKey(id)) return id;
       } 
 			return null;
   }
 
+  public String get(String id){ // Devuelve el elemento de id , null si no se encuentra
+      // Si tenemos shadowed la variable la devolvemos
+      String shadowed = getShadowed(id);
+      if(shadowed!=null) return shadowed;
+      // En caso contrario buscamos la variable normal
+      for(HashMap<String, String> scope : table) {
+        if(scope.containsKey(id)) return id;
+      }
+			return null; // Si no la encontramos devolvemos nul
+  }
+
+
   public boolean inScope(String id){ // Devuelve TRUE si el identificador esta en el scope
     return get(id) != null;
+  }
+
+  public boolean inLastScope(String id){ // Devuelve TRUE si el identificador esta en el ultimo scope
+    return table.peek().get(id) != null;
   }
 
   public void debug(){ 

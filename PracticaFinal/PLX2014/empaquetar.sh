@@ -1,3 +1,3 @@
 #!/bin/bash
 
-zip plxc.zip PLXC.* visitor/* utils/* ast/*
+zip plxc.zip PLXC.* visitor/* utils/* ast/* table/*
