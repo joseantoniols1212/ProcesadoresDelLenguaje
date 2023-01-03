@@ -1,0 +1,114 @@
+import java_cup.runtime.*;
+import ast.*;
+import java.util.ArrayList;
+
+terminal FLOAT, CHAR, INT;
+terminal Integer ENTERO;
+terminal String IDENT, CARACTER;
+terminal String MAYOR, MENOR, IGUAL, DISTINTO, MAYORIGUAL, MENORIGUAL;
+terminal MAS, MENOS, UMENOS, POR, DIV, ASIG, MODULO;
+terminal PREINC, PREDEC, POSTINC, POSTDEC, INC, DEC;
+terminal NOT, AND, OR;
+terminal TO, STEP, DOWNTO;
+terminal IF, ELSE, DO, WHILE, FOR, PRINT;
+terminal AP, CP, ALL, CLL, PYC, COMA;
+
+non terminal String comparationOp, tipo;
+non terminal AsignationNode asignacion;
+non terminal DeclarationNode declaracion;
+non terminal Node exp, sent, bucle, funcion;
+non terminal BlockNode program, lista_sent;
+non terminal LogicNode condicion;
+non terminal ArrayList<Node> lista_declaracion;
+
+precedence left MENOS, MAS;
+precedence left OR;
+precedence left AND;
+precedence left IGUAL, DISTINTO;
+precedence left MENOR, MAYOR, MENORIGUAL, MAYORIGUAL;
+precedence left POR, DIV, MODULO;
+precedence right UMENOS, NOT;
+precedence right PREDEC, PREDEC;
+precedence left POSTDEC, POSTINC;
+precedence right ELSE;
+
+program ::= lista_sent:l                             {: RESULT = l; :}
+          ;
+
+lista_sent ::= sent:s                                {: RESULT = new BlockNode(); RESULT.add(s); :}
+             | lista_sent:l sent:s                   {: l.add(s); RESULT = l; :}
+             ;
+
+sent ::= exp:e PYC                                   {: RESULT = e; :}
+       | bucle:b                                     {: RESULT = b; :}
+       | funcion:f                                   {: RESULT = f; :}
+       | ALL lista_sent:l CLL                        {: RESULT = l; :}
+       | declaracion:d PYC                           {: RESULT = d; :}
+       ;
+
+declaracion ::= tipo:t lista_declaracion:l           {: RESULT = new DeclarationNode(t,l); :}
+              ;
+
+lista_declaracion ::= lista_declaracion:l COMA asignacion:a  {: l.add(a); RESULT = l; :}
+                    | lista_declaracion:l COMA IDENT:i       {: l.add(new IdentifierNode(i)); RESULT = l; :}
+                    | asignacion:a                           {: RESULT = new ArrayList(); RESULT.add(a); :}
+                    | IDENT:i                                {: RESULT = new ArrayList(); RESULT.add(new IdentifierNode(i)); :}
+                    ;
+
+tipo ::= INT         {: RESULT = "INT"; :}
+       | CHAR        {: RESULT = "CHAR"; :}
+       | FLOAT       {: RESULT = "FLOAT"; :}
+       ;
+
+bucle ::= IF AP condicion:c CP sent:s                                         {: RESULT = new IfNode(c, s); :}
+        | IF AP condicion:c CP sent:s1 ELSE sent:s2                           {: RESULT = new IfElseNode(c, s1, s2); :}
+        | WHILE AP condicion:c CP sent:s                                      {: RESULT = new WhileNode(c,s); :}
+        | DO sent:s WHILE AP condicion:c CP PYC                               {: RESULT = new DoWhileNode(c,s); :}
+        | FOR AP exp:e1 PYC condicion:c PYC exp:e2 CP sent:s                  {: RESULT = new ForNode(c, e1, e2, s); :}
+        | FOR asignacion:a TO exp:e DO ALL lista_sent:l CLL                   {: RESULT = new ForToNode(a, e, l); :}
+        | FOR asignacion:a DOWNTO exp:e DO ALL lista_sent:l CLL               {: RESULT = new ForDownToNode(a, e, l); :}
+        | FOR asignacion:a TO exp:e1 STEP exp:e2 DO ALL lista_sent:l CLL      {: RESULT = new ForToNode(a, e1, e2, l); :}
+        | FOR asignacion:a DOWNTO exp:e1 STEP exp:e2 DO ALL lista_sent:l CLL  {: RESULT = new ForDownToNode(a, e1, e2, l); :}
+        ;
+        
+funcion ::= PRINT AP exp:e CP PYC       {: RESULT = new CallNode("print", e); :}
+          ;
+
+asignacion ::= IDENT:i ASIG exp:e  {: RESULT = new AsignationNode(i,e); :}
+             ;
+
+exp ::= exp:e1 MAS:o exp:e2        {: RESULT = new BinaryOperationNode("+", e1, e2); :}
+      | exp:e1 MENOS:o exp:e2      {: RESULT = new BinaryOperationNode("-", e1, e2); :}
+      | exp:e1 POR:o exp:e2        {: RESULT = new BinaryOperationNode("*", e1, e2); :}
+      | exp:e1 DIV:o exp:e2        {: RESULT = new BinaryOperationNode("/", e1, e2); :}
+      | AP exp:e CP                {: RESULT = e; :}
+      | INC IDENT:e                {: RESULT = new UnaryOperationNode("pre++",new IdentifierNode(e)); :}
+        %prec PREINC
+      | IDENT:e INC                {: RESULT = new UnaryOperationNode("post++",new IdentifierNode(e)); :}
+        %prec POSTINC
+      | DEC IDENT:e                {: RESULT = new UnaryOperationNode("pre--",new IdentifierNode(e)); :}
+        %prec PREDEC
+      | IDENT:e DEC                {: RESULT = new UnaryOperationNode("post--",new IdentifierNode(e)); :}
+        %prec POSTDEC
+      | IDENT:i                    {: RESULT = new IdentifierNode(i); :}
+      | MENOS exp:e                {: RESULT = new UnaryOperationNode("-",e); :}
+        %prec UMENOS
+      | ENTERO:n                   {: RESULT = new ConstantNode<Integer>(n); :}
+      | asignacion:a               {: RESULT = a; :}
+      | exp:e1 MODULO:o exp:e2     {: RESULT = new BinaryOperationNode("%",e1,e2); :}
+      ;
+
+condicion ::= exp:e1 comparationOp:o exp:e2        {: RESULT = new ComparationNode(o, e1, e2);:}
+            | NOT condicion:c                      {: c.not(); RESULT = c; :}
+            | condicion:c1 AND condicion:c2        {: RESULT = new LogicOperationNode("&&", c1, c2); :}
+            | condicion:c1 OR condicion:c2         {: RESULT = new LogicOperationNode("||", c1, c2); :}
+            | AP condicion:c CP                    {: RESULT = c; :}
+            ;
+
+comparationOp ::= IGUAL:o                {: RESULT = o; :}
+                | DISTINTO:o             {: RESULT = o; :}
+                | MAYOR:o                {: RESULT = o; :}
+                | MENOR:o                {: RESULT = o; :}
+                | MENORIGUAL:o           {: RESULT = o; :}
+                | MAYORIGUAL:o           {: RESULT = o; :}
+                ;
