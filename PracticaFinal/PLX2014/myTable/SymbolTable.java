@@ -1,8 +1,7 @@
-package table;
+package myTable;
 
 import java.util.HashMap;
 import java.util.ArrayDeque;
-import java.util.Iterator;
 
 public class SymbolTable {
 
@@ -22,33 +21,20 @@ public class SymbolTable {
   }
 
   public boolean add(String id, String type){  // Devolvemos true si se añade correctamente
-      if(!inScope(id)){
+      if(!inLastScope(id) || !inScope(id)){
 			  table.peek().put(id, type);
-        return true;
-      } else if(!inLastScope(id)){
-			  table.peek().put(id+"_"+table.size(), type);
         return true;
       } 
       return false;
   }
 
-  private String getShadowed(String id){
-      id += "_"+table.size();
-      for(HashMap<String, String> scope : table) {
-        if(scope.containsKey(id)) return id;
-      } 
-			return null;
-  }
-
   public String get(String id){ // Devuelve el elemento de id , null si no se encuentra
-      // Si tenemos shadowed la variable la devolvemos
-      String shadowed = getShadowed(id);
-      if(shadowed!=null) return shadowed;
       // En caso contrario buscamos la variable normal
+      int i = 0;
       for(HashMap<String, String> scope : table) {
-        if(scope.containsKey(id)) return id;
+        if(scope.containsKey(id)) i++;
       }
-			return null; // Si no la encontramos devolvemos nul
+			return i == 0? null : i==1? id : id+"_"+i; // Si no la encontramos devolvemos nul
   }
 
 

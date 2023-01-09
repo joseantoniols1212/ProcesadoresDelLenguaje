@@ -11,14 +11,4 @@ public class DeclarationNode extends Node {
         this.type = type;
         this.declarations = declarations;
     }
-
-    public DeclarationNode(String type, Node declaration) {
-        this.type = type;
-        this.declarations = new ArrayList<>();
-        this.declarations.add(declaration);
-    }
-
-    public void add(Node declaration) {
-        this.declarations.add(declaration);
-    }
 }
